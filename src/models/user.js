@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const bcrypt = require('bcryptjs')
 
-
-const User = mongoose.model('User',{
+const userSchema = new mongoose.Schema({
   name:{
     type: String,
     required: true,
@@ -40,5 +40,19 @@ const User = mongoose.model('User',{
     }
   }
 })
+
+// 미들웨어
+userSchema.pre('save',async function (next){
+  const user = this
+
+  // 처음 비번 생성하거나 업데이트 할때만 true
+  if(user.isModified('password')){
+    user.password = await bcrypt.hash(user.password, 8)
+  }
+
+  next()
+})
+
+const User = mongoose.model('User', userSchema)
 
 module.exports = User
