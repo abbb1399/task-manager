@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new mongoose.Schema({
   name:{
@@ -39,8 +40,30 @@ const userSchema = new mongoose.Schema({
         throw new Error('Age must be a positive number')
       }
     }
-  }
+  },
+  tokens:[{
+    token:{
+      type:String,
+      required: true
+    }
+  }]
 })
+
+
+userSchema.methods.generateAuthToken = async function (){
+  // 여기서 this는 저장될 document와 같다, this는 저장될 individual user에 접근 할 수 있게 해준다
+  const user = this
+  // 첫번째 파라미터는 유니크한거
+  const token = jwt.sign({_id: user._id.toString()}, 'thisismynewcourse')
+  
+  user.tokens = user.tokens.concat({token})
+  await user.save()
+
+  return token
+
+}
+
+
 
 userSchema.statics.findByCredentials = async (email, password) =>{
   
@@ -62,9 +85,10 @@ userSchema.statics.findByCredentials = async (email, password) =>{
 
 
 
-// Hash the plain text password before saving
+// Hash the plain text password before saving - middleware 
 userSchema.pre('save',async function (next){
-  const user = this
+  // 여기서 this는 저장될 document와 같다, this는 저장될 individual user에 접근 할 수 있게 해준다
+  const user = this 
 
   // 처음 비번 생성하거나 업데이트 할때만 true
   if(user.isModified('password')){
