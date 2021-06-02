@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   },
   email:{
     type:String,
+    unique:true,
     required:true,
     trim:true,
     lowercase:true,
@@ -41,7 +42,27 @@ const userSchema = new mongoose.Schema({
   }
 })
 
-// 미들웨어
+userSchema.statics.findByCredentials = async (email, password) =>{
+  
+  const user = await User.findOne({ email })
+  if(!user){
+    //즉시 실행 중단후 메세지 날림
+    throw new Error('Unable to login')
+  }
+  
+  const isMatch = await bcrypt.compare(password, user.password)
+
+  if(!isMatch){
+    throw new Error('Unable to login')
+  }
+
+  return user
+}
+
+
+
+
+// Hash the plain text password before saving
 userSchema.pre('save',async function (next){
   const user = this
 
