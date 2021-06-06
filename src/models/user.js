@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({
   name:{
@@ -49,6 +50,25 @@ const userSchema = new mongoose.Schema({
   }]
 })
 
+userSchema.virtual('tasks', {
+  ref:'Task',
+  localField:'_id',
+  foreignField:'owner'
+})
+
+
+
+// res.send 할때 JSON.stringfy 하기때문에,  우리가 toJSON으로 조작할수 있다.
+userSchema.methods.toJSON = function (){
+  const user = this
+  const userObject = user.toObject()
+  
+  delete userObject.password
+  delete userObject.tokens
+
+  return userObject
+}
+
 
 userSchema.methods.generateAuthToken = async function (){
   // 여기서 this는 저장될 document와 같다, this는 저장될 individual user에 접근 할 수 있게 해준다
@@ -60,7 +80,6 @@ userSchema.methods.generateAuthToken = async function (){
   await user.save()
 
   return token
-
 }
 
 
@@ -97,6 +116,15 @@ userSchema.pre('save',async function (next){
 
   next()
 })
+
+// Delete user tasks when user is removed
+userSchema.pre('remove', async function(next){
+  const user = this
+  await Task.deleteMany({ owner: user._id })
+  next()
+})
+
+
 
 const User = mongoose.model('User', userSchema)
 
