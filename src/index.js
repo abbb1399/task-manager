@@ -34,14 +34,14 @@ app.listen(port,()=>{
 const Task = require('./models/task')
 const User = require('./models/user')
 
-const main = async ()=>{
-  // const task = await Task.findById('60bcc3a32b908f3420677042')
-  // await task.populate('owner').execPopulate()
-  // console.log(task.owner)
+// const main = async ()=>{
+//   // const task = await Task.findById('60bcc3a32b908f3420677042')
+//   // await task.populate('owner').execPopulate()
+//   // console.log(task.owner)
 
-  const user = await User.findById('60bcc39d2b908f3420677040')
-  await user.populate('tasks').execPopulate()
-  console.log(user.tasks)
-}
+//   const user = await User.findById('60bcc39d2b908f3420677040')
+//   await user.populate('tasks').execPopulate()
+//   console.log(user.tasks)
+// }
 
-main()
+// main()
