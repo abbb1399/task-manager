@@ -80,7 +80,7 @@ userSchema.methods.generateAuthToken = async function (){
   // 여기서 this는 저장될 document와 같다, this는 저장될 individual user에 접근 할 수 있게 해준다
   const user = this
   // 첫번째 파라미터는 유니크한거
-  const token = jwt.sign({_id: user._id.toString()}, 'thisismynewcourse')
+  const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_SECRET)
   
   user.tokens = user.tokens.concat({token})
   await user.save()
